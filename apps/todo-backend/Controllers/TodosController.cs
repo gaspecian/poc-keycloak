@@ -27,8 +27,8 @@ public class TodosController : ControllerBase
 
     private bool IsUserAuthentication()
     {
-        var userId = GetUserId();
-        return !string.IsNullOrEmpty(userId) && !User.HasClaim("client_id", "todo-backend-client");
+        // Check if token has session_state claim (only present in user authentication)
+        return User.HasClaim(c => c.Type == "sid" || c.Type == "session_state");
     }
 
     [HttpGet]
