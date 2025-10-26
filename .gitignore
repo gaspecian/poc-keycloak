@@ -1,0 +1,9 @@
+keycloak-credentials.txt
+appsettings.Development.json
+*.user
+*.suo
+bin/
+obj/
+.vs/
+.vscode/
+*.log

@@ -10,16 +10,16 @@
 - [x] Access Keycloak admin console and verify login
 
 ### Phase 2: Keycloak Configuration
-- [ ] Create realm: `poc-realm`
-- [ ] Create client scope: `todo-backend`
-- [ ] Create client: `todo-backend-client`
-  - [ ] Enable client authentication
-  - [ ] Enable direct access grants
-  - [ ] Enable service accounts
-  - [ ] Copy client secret for later use
-  - [ ] Assign `todo-backend` scope as default
-- [ ] Create test user: `testuser` with password
-- [ ] Verify OIDC discovery endpoint: `http://localhost:8080/realms/poc-realm/.well-known/openid-configuration`
+- [x] Create realm: `poc-realm`
+- [x] Create client scope: `todo-backend`
+- [x] Create client: `todo-backend-client`
+  - [x] Enable client authentication
+  - [x] Enable direct access grants
+  - [x] Enable service accounts
+  - [x] Copy client secret for later use
+  - [x] Assign `todo-backend` scope as default
+- [x] Create test user: `testuser` with password
+- [x] Verify OIDC discovery endpoint: `http://localhost:8080/realms/poc-realm/.well-known/openid-configuration`
 
 ### Phase 3: Todo Backend API - Project Setup
 - [ ] Create .NET Web API project
