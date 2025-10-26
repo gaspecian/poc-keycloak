@@ -32,15 +32,15 @@
 - [x] Create database context and Todo entity model
 
 ### Phase 4: Todo Backend API - Authentication Implementation
-- [ ] Create AuthController with three endpoints:
-  - [ ] POST /api/auth/token
-  - [ ] POST /api/auth/refresh
-  - [ ] POST /api/auth/revoke
-- [ ] Create KeycloakService to handle OIDC communication
-- [ ] Implement token request logic (client_credentials and password grants)
-- [ ] Implement refresh token logic
-- [ ] Implement token revocation logic
-- [ ] Add scope parameter (`todo-backend`) to all Keycloak requests
+- [x] Create AuthController with three endpoints:
+  - [x] POST /api/auth/token
+  - [x] POST /api/auth/refresh
+  - [x] POST /api/auth/revoke
+- [x] Create KeycloakService to handle OIDC communication
+- [x] Implement token request logic (client_credentials and password grants)
+- [x] Implement refresh token logic
+- [x] Implement token revocation logic
+- [x] Add scope parameter (`todo-backend`) to all Keycloak requests
 
 ### Phase 5: Todo Backend API - JWT Validation
 - [ ] Configure JWT Bearer authentication in Program.cs
