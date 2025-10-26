@@ -43,18 +43,18 @@
 - [x] Add scope parameter (`todo-backend`) to all Keycloak requests
 
 ### Phase 5: Todo Backend API - JWT Validation
-- [ ] Configure JWT Bearer authentication in Program.cs
-- [ ] Set Keycloak as authority
-- [ ] Configure token validation parameters
-- [ ] Add authentication middleware
+- [x] Configure JWT Bearer authentication in Program.cs
+- [x] Set Keycloak as authority
+- [x] Configure token validation parameters
+- [x] Add authentication middleware
 - [ ] Test token validation with protected endpoints
 
 ### Phase 6: Todo Backend API - Business Logic
-- [ ] Create Todo model (Id, Title, Description, IsCompleted, CreatedAt)
-- [ ] Create TodoController with CRUD endpoints
-- [ ] Add [Authorize] attribute to protect endpoints
-- [ ] Implement EF Core repository pattern (optional)
-- [ ] Create and run database migrations
+- [x] Create Todo model (Id, Title, Description, IsCompleted, CreatedAt)
+- [x] Create TodoController with CRUD endpoints
+- [x] Add [Authorize] attribute to protect endpoints
+- [x] Implement EF Core repository pattern (optional)
+- [x] Create and run database migrations
 
 ### Phase 7: Swagger Configuration
 - [ ] Configure Swagger with OAuth2 support
