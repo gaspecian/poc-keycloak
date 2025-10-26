@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TodoBackend.Services;
+using System.Text.Json.Serialization;
 
 namespace TodoBackend.Controllers;
 
@@ -94,6 +95,22 @@ public class AuthController : ControllerBase
     }
 }
 
-public record TokenRequestDto(string GrantType, string ClientId, string ClientSecret, string? Username = null, string? Password = null);
-public record RefreshTokenRequestDto(string ClientId, string ClientSecret, string RefreshToken);
-public record RevokeTokenRequestDto(string ClientId, string ClientSecret, string Token);
+public record TokenRequestDto(
+    [property: JsonPropertyName("grant_type")] string GrantType,
+    [property: JsonPropertyName("client_id")] string ClientId,
+    [property: JsonPropertyName("client_secret")] string ClientSecret,
+    [property: JsonPropertyName("username")] string? Username = null,
+    [property: JsonPropertyName("password")] string? Password = null
+);
+
+public record RefreshTokenRequestDto(
+    [property: JsonPropertyName("client_id")] string ClientId,
+    [property: JsonPropertyName("client_secret")] string ClientSecret,
+    [property: JsonPropertyName("refresh_token")] string RefreshToken
+);
+
+public record RevokeTokenRequestDto(
+    [property: JsonPropertyName("client_id")] string ClientId,
+    [property: JsonPropertyName("client_secret")] string ClientSecret,
+    [property: JsonPropertyName("token")] string Token
+);
