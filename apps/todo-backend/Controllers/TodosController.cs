@@ -22,7 +22,8 @@ public class TodosController : ControllerBase
     private string? GetUserId()
     {
         return User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-            ?? User.FindFirst("sub")?.Value;
+            ?? User.FindFirst("sub")?.Value
+            ?? User.FindFirst("preferred_username")?.Value;
     }
 
     private bool IsUserAuthentication()
