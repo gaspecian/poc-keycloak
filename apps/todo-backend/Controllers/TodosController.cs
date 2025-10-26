@@ -33,6 +33,7 @@ public class TodosController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = "list-todos")]
     public async Task<ActionResult<IEnumerable<Todo>>> GetTodos()
     {
         var query = _context.Todos.AsQueryable();
@@ -47,6 +48,7 @@ public class TodosController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Policy = "read-todo")]
     public async Task<ActionResult<Todo>> GetTodo(int id)
     {
         var query = _context.Todos.Where(t => t.Id == id);
@@ -66,6 +68,7 @@ public class TodosController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "create-todo")]
     public async Task<ActionResult<Todo>> CreateTodo(CreateTodoDto dto)
     {
         var userId = GetUserId() ?? "system";
@@ -86,6 +89,7 @@ public class TodosController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "update-todo")]
     public async Task<IActionResult> UpdateTodo(int id, UpdateTodoDto dto)
     {
         var query = _context.Todos.Where(t => t.Id == id);
@@ -111,6 +115,7 @@ public class TodosController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = "delete-todo")]
     public async Task<IActionResult> DeleteTodo(int id)
     {
         var query = _context.Todos.Where(t => t.Id == id);

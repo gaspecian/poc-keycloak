@@ -69,7 +69,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("create-todo", policy => policy.RequireRole("todo-manager"));
+    options.AddPolicy("read-todo", policy => policy.RequireRole("todo-manager"));
+    options.AddPolicy("update-todo", policy => policy.RequireRole("todo-manager"));
+    options.AddPolicy("delete-todo", policy => policy.RequireRole("todo-manager"));
+    options.AddPolicy("list-todos", policy => policy.RequireRole("todo-manager"));
+});
 
 var app = builder.Build();
 
