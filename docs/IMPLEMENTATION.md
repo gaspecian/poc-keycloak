@@ -22,14 +22,14 @@
 - [x] Verify OIDC discovery endpoint: `http://localhost:8080/realms/poc-realm/.well-known/openid-configuration`
 
 ### Phase 3: Todo Backend API - Project Setup
-- [ ] Create .NET Web API project
-- [ ] Add required NuGet packages:
-  - [ ] Microsoft.AspNetCore.Authentication.JwtBearer
-  - [ ] Microsoft.EntityFrameworkCore.Npgsql
-  - [ ] Swashbuckle.AspNetCore
-  - [ ] System.Net.Http
-- [ ] Configure appsettings.json with Keycloak and database settings
-- [ ] Create database context and Todo entity model
+- [x] Create .NET Web API project
+- [x] Add required NuGet packages:
+  - [x] Microsoft.AspNetCore.Authentication.JwtBearer
+  - [x] Microsoft.EntityFrameworkCore.Npgsql
+  - [x] Swashbuckle.AspNetCore
+  - [x] System.Net.Http
+- [x] Configure appsettings.json with Keycloak and database settings
+- [x] Create database context and Todo entity model
 
 ### Phase 4: Todo Backend API - Authentication Implementation
 - [ ] Create AuthController with three endpoints:
