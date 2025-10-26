@@ -47,7 +47,7 @@
 - [x] Set Keycloak as authority
 - [x] Configure token validation parameters
 - [x] Add authentication middleware
-- [ ] Test token validation with protected endpoints
+- [x] Test token validation with protected endpoints
 
 ### Phase 6: Todo Backend API - Business Logic
 - [x] Create Todo model (Id, Title, Description, IsCompleted, CreatedAt)
@@ -60,17 +60,17 @@
 - [x] Configure Swagger with OAuth2 support
 - [x] Add security definitions for Bearer token
 - [x] Add authorization button in Swagger UI
-- [ ] Test authentication flow through Swagger
+- [x] Test authentication flow through Swagger
 
 ### Phase 8: Testing & Validation
-- [ ] Test client_credentials grant flow
-- [ ] Test password grant flow
-- [ ] Test refresh token flow
-- [ ] Test token revocation
-- [ ] Test protected endpoints with valid token
-- [ ] Test protected endpoints without token (should return 401)
-- [ ] Test with invalid/expired token
-- [ ] Test scope validation
+- [x] Test client_credentials grant flow
+- [x] Test password grant flow
+- [x] Test refresh token flow
+- [x] Test token revocation
+- [x] Test protected endpoints with valid token
+- [x] Test protected endpoints without token (should return 401)
+- [x] Test with invalid/expired token
+- [x] Test scope validation
 
 ### Phase 9: Documentation
 - [x] Document all API endpoints
