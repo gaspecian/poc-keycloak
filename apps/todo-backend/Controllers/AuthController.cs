@@ -42,8 +42,7 @@ public class AuthController : ControllerBase
             access_token = response.AccessToken,
             token_type = response.TokenType,
             expires_in = response.ExpiresIn,
-            refresh_token = response.RefreshToken,
-            scope = response.Scope
+            refresh_token = response.RefreshToken
         });
     }
 
@@ -69,8 +68,7 @@ public class AuthController : ControllerBase
             access_token = response.AccessToken,
             token_type = response.TokenType,
             expires_in = response.ExpiresIn,
-            refresh_token = response.RefreshToken,
-            scope = response.Scope
+            refresh_token = response.RefreshToken
         });
     }
 
