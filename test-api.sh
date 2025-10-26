@@ -42,8 +42,28 @@ else
 fi
 echo ""
 
-# Test 2: Password Grant Flow
-echo "✓ Test 2: Password Grant Flow"
+# Test 2: Client Credentials with Invalid Secret
+echo "✓ Test 2: Client Credentials with Invalid Secret"
+echo "-------------------------------------------------"
+RESPONSE=$(curl -s -X POST "${API_URL}/api/auth/token" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"grant_type\": \"client_credentials\",
+    \"client_id\": \"${CLIENT_ID}\",
+    \"client_secret\": \"invalid_secret_12345\"
+  }")
+
+INVALID_TOKEN=$(echo $RESPONSE | jq -r '.access_token')
+if [ "$INVALID_TOKEN" = "null" ] || [ -z "$INVALID_TOKEN" ]; then
+    echo "✅ PASS: Correctly rejects invalid client secret"
+else
+    echo "❌ FAIL: Should reject invalid client secret"
+    exit 1
+fi
+echo ""
+
+# Test 3: Password Grant Flow
+echo "✓ Test 3: Password Grant Flow"
 echo "------------------------------"
 RESPONSE=$(curl -s -X POST "${API_URL}/api/auth/token" \
   -H "Content-Type: application/json" \
@@ -68,8 +88,8 @@ else
 fi
 echo ""
 
-# Test 3: Access Protected Endpoint WITHOUT Token
-echo "✓ Test 3: Access Protected Endpoint WITHOUT Token"
+# Test 4: Access Protected Endpoint WITHOUT Token
+echo "✓ Test 4: Access Protected Endpoint WITHOUT Token"
 echo "--------------------------------------------------"
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${API_URL}/api/todos")
 
@@ -81,8 +101,8 @@ else
 fi
 echo ""
 
-# Test 4: Access Protected Endpoint WITH Valid Token
-echo "✓ Test 4: Access Protected Endpoint WITH Valid Token"
+# Test 5: Access Protected Endpoint WITH Valid Token
+echo "✓ Test 5: Access Protected Endpoint WITH Valid Token"
 echo "-----------------------------------------------------"
 RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${API_URL}/api/todos" \
   -H "Authorization: Bearer ${USER_TOKEN}")
@@ -100,8 +120,8 @@ else
 fi
 echo ""
 
-# Test 5: Create Todo
-echo "✓ Test 5: Create Todo (POST /api/todos)"
+# Test 6: Create Todo
+echo "✓ Test 6: Create Todo (POST /api/todos)"
 echo "----------------------------------------"
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${API_URL}/api/todos" \
   -H "Authorization: Bearer ${USER_TOKEN}" \
@@ -126,9 +146,9 @@ else
 fi
 echo ""
 
-# Test 6: Get Todo by ID
+# Test 7: Get Todo by ID
 if [ -n "$TODO_ID" ]; then
-    echo "✓ Test 6: Get Todo by ID (GET /api/todos/${TODO_ID})"
+    echo "✓ Test 7: Get Todo by ID (GET /api/todos/${TODO_ID})"
     echo "-----------------------------------------------------"
     RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${API_URL}/api/todos/${TODO_ID}" \
       -H "Authorization: Bearer ${USER_TOKEN}")
@@ -146,9 +166,9 @@ if [ -n "$TODO_ID" ]; then
     echo ""
 fi
 
-# Test 7: Update Todo
+# Test 8: Update Todo
 if [ -n "$TODO_ID" ]; then
-    echo "✓ Test 7: Update Todo (PUT /api/todos/${TODO_ID})"
+    echo "✓ Test 8: Update Todo (PUT /api/todos/${TODO_ID})"
     echo "--------------------------------------------------"
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "${API_URL}/api/todos/${TODO_ID}" \
       -H "Authorization: Bearer ${USER_TOKEN}" \
@@ -168,8 +188,8 @@ if [ -n "$TODO_ID" ]; then
     echo ""
 fi
 
-# Test 8: Refresh Token Flow
-echo "✓ Test 8: Refresh Token Flow"
+# Test 9: Refresh Token Flow
+echo "✓ Test 9: Refresh Token Flow"
 echo "-----------------------------"
 RESPONSE=$(curl -s -X POST "${API_URL}/api/auth/refresh" \
   -H "Content-Type: application/json" \
@@ -190,9 +210,9 @@ else
 fi
 echo ""
 
-# Test 9: Access with Invalid Token
-echo "✓ Test 9: Access with Invalid Token"
-echo "------------------------------------"
+# Test 10: Access with Invalid Token
+echo "✓ Test 10: Access with Invalid Token"
+echo "-------------------------------------"
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "${API_URL}/api/todos" \
   -H "Authorization: Bearer invalid_token_12345")
 
@@ -204,9 +224,9 @@ else
 fi
 echo ""
 
-# Test 10: Delete Todo
+# Test 11: Delete Todo
 if [ -n "$TODO_ID" ]; then
-    echo "✓ Test 10: Delete Todo (DELETE /api/todos/${TODO_ID})"
+    echo "✓ Test 11: Delete Todo (DELETE /api/todos/${TODO_ID})"
     echo "------------------------------------------------------"
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "${API_URL}/api/todos/${TODO_ID}" \
       -H "Authorization: Bearer ${USER_TOKEN}")
@@ -220,8 +240,8 @@ if [ -n "$TODO_ID" ]; then
     echo ""
 fi
 
-# Test 11: Revoke Token
-echo "✓ Test 11: Revoke Token"
+# Test 12: Revoke Token
+echo "✓ Test 12: Revoke Token"
 echo "-----------------------"
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${API_URL}/api/auth/revoke" \
   -H "Content-Type: application/json" \
@@ -240,8 +260,8 @@ else
 fi
 echo ""
 
-# Test 12: Scope Validation
-echo "✓ Test 12: Scope Validation"
+# Test 13: Scope Validation
+echo "✓ Test 13: Scope Validation"
 echo "----------------------------"
 TOKEN_PAYLOAD=$(echo $CLIENT_TOKEN | cut -d'.' -f2)
 case $((${#TOKEN_PAYLOAD} % 4)) in
