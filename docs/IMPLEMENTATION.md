@@ -1,189 +1,305 @@
 # Implementation Guide
 
-## Development Plan - TODO List
+This guide provides step-by-step instructions for implementing the Keycloak authentication system.
 
-### Phase 1: Infrastructure Setup
-- [x] Create folder structure (docs, keycloak, apps/todo-backend)
-- [x] Create docker-compose.yml for Keycloak and PostgreSQL
-- [x] Create Keycloak realm import configuration (optional)
-- [x] Start Docker containers and verify connectivity
-- [x] Access Keycloak admin console and verify login
+## Table of Contents
 
-### Phase 2: Keycloak Configuration
-- [x] Create realm: `poc-realm`
-- [x] Create client scope: `todo-backend`
-- [x] Create client: `todo-backend-client`
-  - [x] Enable client authentication
-  - [x] Enable direct access grants
-  - [x] Enable service accounts
-  - [x] Copy client secret for later use
-  - [x] Assign `todo-backend` scope as default
-- [x] Create test user: `testuser` with password
-- [x] Verify OIDC discovery endpoint: `http://localhost:8080/realms/poc-realm/.well-known/openid-configuration`
-
-### Phase 3: Todo Backend API - Project Setup
-- [x] Create .NET Web API project
-- [x] Add required NuGet packages:
-  - [x] Microsoft.AspNetCore.Authentication.JwtBearer
-  - [x] Microsoft.EntityFrameworkCore.Npgsql
-  - [x] Swashbuckle.AspNetCore
-  - [x] System.Net.Http
-- [x] Configure appsettings.json with Keycloak and database settings
-- [x] Create database context and Todo entity model
-
-### Phase 4: Todo Backend API - Authentication Implementation
-- [x] Create AuthController with three endpoints:
-  - [x] POST /api/auth/token
-  - [x] POST /api/auth/refresh
-  - [x] POST /api/auth/revoke
-- [x] Create KeycloakService to handle OIDC communication
-- [x] Implement token request logic (client_credentials and password grants)
-- [x] Implement refresh token logic
-- [x] Implement token revocation logic
-- [x] Add scope parameter (`todo-backend`) to all Keycloak requests
-
-### Phase 5: Todo Backend API - JWT Validation
-- [x] Configure JWT Bearer authentication in Program.cs
-- [x] Set Keycloak as authority
-- [x] Configure token validation parameters
-- [x] Add authentication middleware
-- [x] Test token validation with protected endpoints
-
-### Phase 6: Todo Backend API - Business Logic
-- [x] Create Todo model (Id, Title, Description, IsCompleted, CreatedAt)
-- [x] Create TodoController with CRUD endpoints
-- [x] Add [Authorize] attribute to protect endpoints
-- [x] Implement EF Core repository pattern (optional)
-- [x] Create and run database migrations
-
-### Phase 7: Swagger Configuration
-- [x] Configure Swagger with OAuth2 support
-- [x] Add security definitions for Bearer token
-- [x] Add authorization button in Swagger UI
-- [x] Test authentication flow through Swagger
-
-### Phase 8: Testing & Validation
-- [x] Test client_credentials grant flow
-- [x] Test password grant flow
-- [x] Test refresh token flow
-- [x] Test token revocation
-- [x] Test protected endpoints with valid token
-- [x] Test protected endpoints without token (should return 401)
-- [x] Test with invalid/expired token
-- [x] Test scope validation
-
-### Phase 9: Documentation
-- [x] Document all API endpoints
-- [x] Create example curl commands
-- [x] Document error responses
-- [x] Add troubleshooting guide
-- [x] Create README.md with quick start guide
-
-### Phase 10: Cleanup & Best Practices
-- [x] Add error handling and logging
-- [x] Add input validation
-- [x] Configure CORS if needed
-- [x] Add health check endpoints
-- [x] Review security configurations
-- [x] Add .gitignore for secrets
-- [x] Create environment variable templates
-
----
+1. [Prerequisites](#prerequisites)
+2. [Quick Start](#quick-start)
+3. [Manual Setup](#manual-setup)
+4. [Configuration Details](#configuration-details)
+5. [Testing](#testing)
+6. [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
-- Docker and Docker Compose installed
-- .NET 8.0 SDK installed
-- curl or Postman for testing
 
-## Setup Instructions
+### Required Software
 
-### Step 1: Start Keycloak and PostgreSQL
+- **Docker & Docker Compose** (v20.10+)
+- **.NET SDK** (8.0+)
+- **Node.js** (18+)
+- **Make** (optional, for simplified commands)
+- **curl** & **jq** (for testing)
+
+### System Requirements
+
+- 4GB RAM minimum
+- 10GB disk space
+- Linux, macOS, or Windows with WSL2
+
+## Quick Start
+
+### Option 1: Using Makefile (Recommended)
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd poc-api-keycloak
+
+# Full automated setup
+make setup
+
+# Start backend (Terminal 1)
+make start-backend
+
+# Start frontend (Terminal 2)
+make start-frontend
+
+# Access the application
+open http://localhost:3000
+```
+
+### Option 2: Manual Commands
+
+```bash
+# Install dependencies
+cd apps/todo-backend && dotnet restore
+cd ../todo-frontend && npm install --legacy-peer-deps
+
+# Start infrastructure
+cd ../../keycloak && docker compose up -d
+
+# Wait for Keycloak to be ready
+sleep 30
+
+# Configure Keycloak
+./configure-keycloak.sh
+./configure-group-rbac.sh
+./add-app-access-role.sh
+
+# Start backend
+cd ../apps/todo-backend && dotnet run
+
+# Start frontend (new terminal)
+cd apps/todo-frontend && npm run dev
+```
+
+## Manual Setup
+
+### Step 1: Infrastructure Setup
+
+#### 1.1 Start Keycloak and PostgreSQL
 
 ```bash
 cd keycloak
-docker-compose up -d
+docker compose up -d
 ```
 
-Wait for Keycloak to start (approximately 30-60 seconds).
+**Verify services are running:**
+```bash
+docker compose ps
+```
 
-### Step 2: Configure Keycloak
+Expected output:
+```
+NAME                STATUS              PORTS
+poc-keycloak        Up                  0.0.0.0:8080->8080/tcp
+poc-postgres        Up                  0.0.0.0:5432->5432/tcp
+```
 
-Access Keycloak Admin Console:
-- URL: http://localhost:8080
-- Username: admin
-- Password: admin
+#### 1.2 Wait for Keycloak to Initialize
 
-#### Create Realm
-1. Click "Create Realm"
-2. Name: `poc-realm`
-3. Click "Create"
+```bash
+# Wait ~30 seconds, then check
+curl http://localhost:8080
+```
 
-#### Create Client Scope
-1. Navigate to "Client Scopes"
-2. Click "Create client scope"
-3. Name: `todo-backend`
-4. Protocol: `openid-connect`
-5. Click "Save"
+### Step 2: Keycloak Configuration
 
-#### Create Client
-1. Navigate to "Clients"
-2. Click "Create client"
-3. Client ID: `todo-backend-client`
-4. Client Protocol: `openid-connect`
-5. Click "Next"
-6. Enable "Client authentication"
-7. Enable "Direct access grants"
-8. Enable "Service accounts roles"
-9. Click "Save"
-10. Go to "Credentials" tab and copy the "Client Secret"
-11. Go to "Client Scopes" tab
-12. Add `todo-backend` scope as "Default" scope
+#### 2.1 Create Realm and Clients
 
-#### Create Test User
-1. Navigate to "Users"
-2. Click "Create user"
-3. Username: `testuser`
-4. Email: `testuser@example.com`
-5. Click "Create"
-6. Go to "Credentials" tab
-7. Set password: `Test123!`
-8. Disable "Temporary"
-9. Click "Set password"
+```bash
+cd keycloak
+./configure-keycloak.sh
+```
 
-### Step 3: Configure API
+**This script creates:**
+- Realm: `poc-realm`
+- Backend client: `todo-backend-client` (confidential)
+- Frontend client: `todo-frontend-client` (public)
+- Test user: `testuser` / `Test123!`
 
-Update the `appsettings.json` in the Todo Backend API with:
-- Keycloak URL
-- Realm name
-- Client ID and Secret (from Step 2)
-- Database connection string
+#### 2.2 Configure RBAC
 
-### Step 4: Run Todo Backend API
+```bash
+./configure-group-rbac.sh
+```
+
+**This script creates:**
+- Roles: `create-todo`, `update-todo`, `list-todos`, `delete-todo`, `get-todo`
+- Group: `todo-app-user` (with all roles)
+- Assigns `testuser` to the group
+
+#### 2.3 Add Application Access Role
+
+```bash
+./add-app-access-role.sh
+```
+
+**This script creates:**
+- Role: `todo-app-access`
+- Assigns role to `todo-app-user` group
+
+### Step 3: Backend Setup
+
+#### 3.1 Install Dependencies
 
 ```bash
 cd apps/todo-backend
 dotnet restore
+```
+
+#### 3.2 Configure Database Connection
+
+The connection string is in `appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=tododb;Username=postgres;Password=postgres"
+  },
+  "Keycloak": {
+    "Authority": "http://localhost:8080/realms/poc-realm",
+    "Audience": "todo-backend"
+  }
+}
+```
+
+#### 3.3 Run Database Migrations
+
+```bash
+dotnet ef database update
+```
+
+#### 3.4 Start Backend
+
+```bash
 dotnet run
 ```
 
-API will be available at: http://localhost:5001
-Swagger UI: http://localhost:5001/swagger
-
-## Testing the Implementation
-
-### 1. Client Credentials Flow (Machine-to-Machine)
-
+**Verify backend is running:**
 ```bash
-curl -X POST http://localhost:5001/api/auth/token \
-  -H "Content-Type: application/json" \
-  -d '{
-    "grant_type": "client_credentials",
-    "client_id": "todo-backend-client",
-    "client_secret": "<YOUR_CLIENT_SECRET>"
-  }'
+curl http://localhost:5001/health
 ```
 
-### 2. Password Grant Flow (User Authentication)
+### Step 4: Frontend Setup
+
+#### 4.1 Install Dependencies
+
+```bash
+cd apps/todo-frontend
+npm install --legacy-peer-deps
+```
+
+#### 4.2 Configure Environment
+
+Create `.env.local`:
+
+```env
+AUTH_SECRET="your-secret-key-here"
+AUTH_KEYCLOAK_ID="todo-frontend-client"
+AUTH_KEYCLOAK_SECRET=""
+AUTH_KEYCLOAK_ISSUER="http://localhost:8080/realms/poc-realm"
+NEXT_PUBLIC_API_URL="http://localhost:5001"
+```
+
+#### 4.3 Start Frontend
+
+```bash
+npm run dev
+```
+
+**Access the application:**
+```
+http://localhost:3000
+```
+
+## Configuration Details
+
+### Keycloak Clients
+
+#### Backend Client (todo-backend-client)
+
+**Settings:**
+- Client Type: Confidential
+- Authentication Flow: Standard Flow, Direct Access Grants
+- Valid Redirect URIs: `http://localhost:5001/*`
+- Web Origins: `http://localhost:3000`
+
+**Credentials:**
+- Client Secret: Generated by Keycloak (check `keycloak-credentials.txt`)
+
+**Roles:**
+- Realm roles mapped to token
+
+#### Frontend Client (todo-frontend-client)
+
+**Settings:**
+- Client Type: Public
+- Authentication Flow: Standard Flow
+- Valid Redirect URIs: `http://localhost:3000/*`
+- Web Origins: `http://localhost:3000`
+- PKCE: Enabled
+
+**Mappers:**
+- Realm roles → `roles` claim
+- User attributes → token claims
+
+### Backend Authorization Policies
+
+Located in `Program.cs`:
+
+```csharp
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("create-todo", policy => policy.RequireRole("create-todo"));
+    options.AddPolicy("get-todo", policy => policy.RequireRole("get-todo"));
+    options.AddPolicy("update-todo", policy => policy.RequireRole("update-todo"));
+    options.AddPolicy("delete-todo", policy => policy.RequireRole("delete-todo"));
+    options.AddPolicy("list-todos", policy => policy.RequireRole("list-todos"));
+});
+```
+
+### Frontend Middleware
+
+Located in `middleware.ts`:
+
+```typescript
+export async function middleware(request: NextRequest) {
+  const session = await auth()
+  
+  // Check authentication
+  if (!session) {
+    return NextResponse.redirect(new URL("/", request.url))
+  }
+  
+  // Check app access role
+  const token = session.accessToken
+  if (token) {
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+    const roles = payload.roles || []
+    
+    if (!roles.includes('todo-app-access')) {
+      return NextResponse.redirect(new URL("/access-denied", request.url))
+    }
+  }
+  
+  return NextResponse.next()
+}
+```
+
+## Testing
+
+### Test User Credentials
+
+```
+Username: testuser
+Password: Test123!
+```
+
+### API Testing
+
+#### Get Access Token
 
 ```bash
 curl -X POST http://localhost:5001/api/auth/token \
@@ -191,88 +307,224 @@ curl -X POST http://localhost:5001/api/auth/token \
   -d '{
     "grant_type": "password",
     "client_id": "todo-backend-client",
-    "client_secret": "<YOUR_CLIENT_SECRET>",
+    "client_secret": "YOUR_CLIENT_SECRET",
     "username": "testuser",
     "password": "Test123!"
   }'
 ```
 
-### 3. Refresh Token
+#### Create Todo
 
 ```bash
-curl -X POST http://localhost:5001/api/auth/refresh \
+curl -X POST http://localhost:5001/api/todos \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "grant_type": "refresh_token",
-    "client_id": "todo-backend-client",
-    "client_secret": "<YOUR_CLIENT_SECRET>",
-    "refresh_token": "<YOUR_REFRESH_TOKEN>"
+    "title": "Test Todo",
+    "description": "Testing API"
   }'
 ```
 
-### 4. Revoke Token
+#### List Todos
 
 ```bash
-curl -X POST http://localhost:5001/api/auth/revoke \
-  -H "Content-Type: application/json" \
-  -d '{
-    "client_id": "todo-backend-client",
-    "client_secret": "<YOUR_CLIENT_SECRET>",
-    "token": "<YOUR_ACCESS_TOKEN>"
-  }'
+curl http://localhost:5001/api/todos \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-### 5. Access Protected Endpoint
+#### Quick Test with Makefile
 
 ```bash
-curl -X GET http://localhost:5001/api/todos \
-  -H "Authorization: Bearer <YOUR_ACCESS_TOKEN>"
+make test-api
 ```
 
-## API Endpoints
+### Frontend Testing
 
-### Authentication Endpoints
-- `POST /api/auth/token` - Get access token
-- `POST /api/auth/refresh` - Refresh access token
-- `POST /api/auth/revoke` - Revoke token
+1. **Login Flow:**
+   - Go to http://localhost:3000
+   - Click "Sign in with Keycloak"
+   - Enter credentials
+   - Should redirect to dashboard
 
-### Todo Endpoints (Protected)
-- `GET /api/todos` - List all todos
-- `GET /api/todos/{id}` - Get todo by ID
-- `POST /api/todos` - Create new todo
-- `PUT /api/todos/{id}` - Update todo
-- `DELETE /api/todos/{id}` - Delete todo
+2. **Authorization Testing:**
+   - Create a new todo
+   - Edit existing todo
+   - Delete todo
+   - All operations should work
+
+3. **Access Control Testing:**
+   - Remove user from `todo-app-user` group in Keycloak
+   - Logout and login again
+   - Should see "Access Denied" page
 
 ## Troubleshooting
 
-### Keycloak not starting
-- Check Docker logs: `docker-compose logs keycloak`
-- Ensure PostgreSQL is healthy: `docker-compose ps`
+### Keycloak Not Starting
 
-### Token validation fails
-- Verify Keycloak URL is accessible from API
-- Check client scope is assigned to client
-- Ensure realm name matches configuration
+**Problem:** Docker container exits immediately
 
-### Database connection issues
-- Verify PostgreSQL is running
-- Check connection string in appsettings.json
-- Ensure database exists (created by EF migrations)
+**Solution:**
+```bash
+# Check logs
+cd keycloak && docker compose logs keycloak
 
-## Security Considerations
+# Remove volumes and restart
+docker compose down -v
+docker compose up -d
+```
 
-1. **Never commit secrets**: Use environment variables or secret management
-2. **Use HTTPS in production**: Configure SSL/TLS certificates
-3. **Token expiration**: Configure appropriate token lifetimes in Keycloak
-4. **Scope validation**: Always validate scopes in API endpoints
-5. **Rate limiting**: Implement rate limiting on auth endpoints
-6. **Audit logging**: Enable logging for authentication events
+### Backend Can't Connect to Keycloak
 
-## Next Steps
+**Problem:** `Unable to retrieve document from: http://localhost:8080/...`
 
-1. Add more APIs to the ecosystem
-2. Implement role-based access control (RBAC)
-3. Add API gateway (e.g., Kong, Ocelot)
-4. Implement token caching
-5. Add monitoring and observability
-6. Configure production-ready settings
+**Solution:**
+- Wait 30 seconds after starting Keycloak
+- Verify Keycloak is accessible: `curl http://localhost:8080`
+- Check firewall settings
+
+### Frontend Shows "Access Denied"
+
+**Problem:** User has valid credentials but can't access app
+
+**Solution:**
+```bash
+# Verify user has roles
+# In Keycloak Admin Console:
+# 1. Go to Users → testuser → Role Mapping
+# 2. Check if user has todo-app-access role
+# 3. If not, add user to todo-app-user group
+
+# Or re-run configuration
+cd keycloak
+./configure-group-rbac.sh
+./add-app-access-role.sh
+```
+
+### Database Migration Errors
+
+**Problem:** `Npgsql.PostgresException: database "tododb" does not exist`
+
+**Solution:**
+```bash
+# Database is created automatically by init-db.sql
+# If missing, recreate:
+docker exec -it poc-postgres psql -U postgres -c "CREATE DATABASE tododb;"
+
+# Then run migrations
+cd apps/todo-backend
+dotnet ef database update
+```
+
+### Token Validation Fails
+
+**Problem:** `401 Unauthorized` on API calls
+
+**Solution:**
+1. Check token expiration (tokens expire after 5 minutes)
+2. Verify Keycloak Authority URL in `appsettings.json`
+3. Check if roles are in token:
+   ```bash
+   # Decode token
+   echo "YOUR_TOKEN" | cut -d'.' -f2 | base64 -d | jq '.roles'
+   ```
+
+### Port Already in Use
+
+**Problem:** `Error: listen EADDRINUSE: address already in use :::3000`
+
+**Solution:**
+```bash
+# Find and kill process
+lsof -ti:3000 | xargs kill -9
+
+# Or use different port
+PORT=3001 npm run dev
+```
+
+## Advanced Configuration
+
+### Adding New Users
+
+```bash
+# Via Keycloak Admin Console
+# 1. Go to http://localhost:8080
+# 2. Login as admin/admin
+# 3. Select poc-realm
+# 4. Users → Add User
+# 5. Set credentials
+# 6. Add to todo-app-user group
+```
+
+### Adding New Roles
+
+```bash
+# Via Keycloak Admin Console
+# 1. Realm Roles → Create Role
+# 2. Add role to group
+# 3. Update backend policies in Program.cs
+# 4. Add [Authorize(Policy = "new-role")] to endpoints
+```
+
+### Custom Claims
+
+Add custom claims to tokens via Keycloak mappers:
+
+1. Clients → todo-frontend-client → Client Scopes
+2. Add mapper → User Attribute
+3. Configure claim name and user attribute
+4. Access in backend via `User.Claims`
+
+## Production Considerations
+
+### Security Hardening
+
+1. **Use HTTPS everywhere**
+   ```bash
+   # Generate SSL certificates
+   # Configure reverse proxy (nginx/traefik)
+   ```
+
+2. **Secure secrets**
+   ```bash
+   # Use environment variables
+   # Use secret management (AWS Secrets Manager, Azure Key Vault)
+   ```
+
+3. **Enable rate limiting**
+   ```csharp
+   // Add rate limiting middleware
+   services.AddRateLimiter(options => { ... });
+   ```
+
+### Performance Optimization
+
+1. **Enable caching**
+   - Redis for session storage
+   - Response caching for read-heavy endpoints
+
+2. **Database optimization**
+   - Add indexes on frequently queried columns
+   - Use connection pooling
+
+3. **CDN for frontend**
+   - Deploy static assets to CDN
+   - Enable compression
+
+### Monitoring
+
+1. **Add logging**
+   ```csharp
+   // Serilog for structured logging
+   builder.Host.UseSerilog();
+   ```
+
+2. **Add health checks**
+   ```csharp
+   builder.Services.AddHealthChecks()
+       .AddNpgSql(connectionString)
+       .AddUrlGroup(new Uri(keycloakUrl));
+   ```
+
+3. **Add metrics**
+   - Prometheus metrics endpoint
+   - Application Insights integration
