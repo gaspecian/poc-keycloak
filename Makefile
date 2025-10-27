@@ -129,3 +129,37 @@ test-api: ## Test API with curl
 	echo "Fetching todos..." && \
 	curl -s http://localhost:5001/api/todos \
 		-H "Authorization: Bearer $$TOKEN" | jq '.'
+
+docker-build-backend: ## Build backend Docker image
+	@echo "$(GREEN)Building backend Docker image...$(NC)"
+	cd apps/todo-backend && docker build -t todo-backend .
+	@echo "$(GREEN)✅ Backend image built$(NC)"
+
+docker-build-frontend: ## Build frontend Docker image
+	@echo "$(GREEN)Building frontend Docker image...$(NC)"
+	cd apps/todo-frontend && docker build -t todo-frontend .
+	@echo "$(GREEN)✅ Frontend image built$(NC)"
+
+docker-build: docker-build-backend docker-build-frontend ## Build all Docker images
+
+docker-run-backend: ## Run backend in Docker
+	@echo "$(GREEN)Running backend in Docker...$(NC)"
+	docker run -d --name todo-backend --network host todo-backend
+	@echo "$(GREEN)✅ Backend running at http://localhost:5001$(NC)"
+
+docker-run-frontend: ## Run frontend in Docker
+	@echo "$(GREEN)Running frontend in Docker...$(NC)"
+	docker run -d --name todo-frontend -p 3000:3000 \
+		-e AUTH_SECRET=$$(openssl rand -base64 32) \
+		todo-frontend
+	@echo "$(GREEN)✅ Frontend running at http://localhost:3000$(NC)"
+
+docker-run: docker-run-backend docker-run-frontend ## Run all apps in Docker
+
+docker-stop: ## Stop Docker containers
+	@echo "$(YELLOW)Stopping Docker containers...$(NC)"
+	docker stop todo-backend todo-frontend 2>/dev/null || true
+	docker rm todo-backend todo-frontend 2>/dev/null || true
+	@echo "$(GREEN)✅ Containers stopped$(NC)"
+
+docker-start: start-infra docker-build docker-run ## Start everything with Docker
