@@ -48,7 +48,7 @@ public class TodosController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Policy = "read-todo")]
+    [Authorize(Policy = "get-todo")]
     public async Task<ActionResult<Todo>> GetTodo(int id)
     {
         var query = _context.Todos.Where(t => t.Id == id);

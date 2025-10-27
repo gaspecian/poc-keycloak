@@ -72,11 +72,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("create-todo", policy => policy.RequireRole("todo-manager"));
-    options.AddPolicy("read-todo", policy => policy.RequireRole("todo-manager"));
-    options.AddPolicy("update-todo", policy => policy.RequireRole("todo-manager"));
-    options.AddPolicy("delete-todo", policy => policy.RequireRole("todo-manager"));
-    options.AddPolicy("list-todos", policy => policy.RequireRole("todo-manager"));
+    options.AddPolicy("create-todo", policy => policy.RequireRole("create-todo"));
+    options.AddPolicy("get-todo", policy => policy.RequireRole("get-todo"));
+    options.AddPolicy("update-todo", policy => policy.RequireRole("update-todo"));
+    options.AddPolicy("delete-todo", policy => policy.RequireRole("delete-todo"));
+    options.AddPolicy("list-todos", policy => policy.RequireRole("list-todos"));
 });
 
 var app = builder.Build();
