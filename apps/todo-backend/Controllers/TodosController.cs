@@ -36,6 +36,12 @@ public class TodosController : ControllerBase
     [Authorize(Policy = "list-todos")]
     public async Task<ActionResult<IEnumerable<Todo>>> GetTodos()
     {
+        Console.WriteLine("=== GetTodos Authorization ===");
+        Console.WriteLine($"User authenticated: {User.Identity?.IsAuthenticated}");
+        Console.WriteLine($"User has list-todos role: {User.IsInRole("list-todos")}");
+        Console.WriteLine($"All roles: {string.Join(", ", User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value))}");
+        Console.WriteLine("==============================");
+        
         var query = _context.Todos.AsQueryable();
         
         if (IsUserAuthentication())

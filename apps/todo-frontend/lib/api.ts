@@ -6,6 +6,19 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL
 async function apiClient(endpoint: string, options?: RequestInit) {
   const session = await auth()
   
+  // Decode token to check roles
+  if (session?.accessToken) {
+    const payload = JSON.parse(Buffer.from(session.accessToken.split('.')[1], 'base64').toString())
+    console.log('Token roles:', payload.roles || 'NO ROLES IN TOKEN')
+  }
+  
+  console.log('API Client Debug:', {
+    endpoint,
+    hasSession: !!session,
+    hasAccessToken: !!session?.accessToken,
+    accessToken: session?.accessToken?.substring(0, 50) + '...'
+  })
+  
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -13,6 +26,12 @@ async function apiClient(endpoint: string, options?: RequestInit) {
       Authorization: `Bearer ${session?.accessToken}`,
       'Content-Type': 'application/json',
     },
+  })
+  
+  console.log('API Response:', {
+    status: response.status,
+    statusText: response.statusText,
+    ok: response.ok
   })
   
   if (!response.ok) {

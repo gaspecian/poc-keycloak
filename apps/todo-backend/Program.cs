@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using TodoBackend.Data;
 using TodoBackend.Services;
 
@@ -66,7 +67,28 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            RoleClaimType = "roles"
+            RoleClaimType = ClaimTypes.Role
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"Auth failed: {context.Exception.Message}");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("=== All Claims ===");
+                if (context.Principal?.Claims != null)
+                {
+                    foreach (var claim in context.Principal.Claims)
+                    {
+                        Console.WriteLine($"  {claim.Type} = {claim.Value}");
+                    }
+                }
+                Console.WriteLine("==================");
+                return Task.CompletedTask;
+            }
         };
     });
 
