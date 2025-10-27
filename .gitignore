@@ -1,12 +1,31 @@
+# Keycloak
 keycloak-credentials.txt
-appsettings.Development.json
-*.user
-*.suo
+
+# .NET
 bin/
 obj/
+*.user
+*.suo
 .vs/
-.vscode/
 *.log
-*.swp
-*~
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
 .DS_Store
+*~
+*.swp
+
+# Environment
+.env.local
+.env.*.local
+appsettings.Development.json

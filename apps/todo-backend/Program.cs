@@ -69,27 +69,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             RoleClaimType = ClaimTypes.Role
         };
-        options.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine($"Auth failed: {context.Exception.Message}");
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = context =>
-            {
-                Console.WriteLine("=== All Claims ===");
-                if (context.Principal?.Claims != null)
-                {
-                    foreach (var claim in context.Principal.Claims)
-                    {
-                        Console.WriteLine($"  {claim.Type} = {claim.Value}");
-                    }
-                }
-                Console.WriteLine("==================");
-                return Task.CompletedTask;
-            }
-        };
     });
 
 builder.Services.AddAuthorization(options =>
