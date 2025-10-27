@@ -221,3 +221,11 @@ make setup             # Start fresh
 ## License
 
 MIT
+
+## Documentation
+
+- [Architecture Documentation](docs/ARCHITECTURE.md) - System design and components
+- [Implementation Guide](docs/IMPLEMENTATION.md) - Step-by-step setup instructions
+- [Frontend Guide](docs/FRONTEND_PLAN.md) - Next.js frontend implementation
+- [Keycloak Operations Guide](docs/KEYCLOAK_GUIDE.md) - Managing permissions and applications
+
