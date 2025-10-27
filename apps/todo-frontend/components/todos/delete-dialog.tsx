@@ -19,14 +19,21 @@ interface DeleteDialogProps {
 
 export function DeleteDialog({ todoId, todoTitle, open, onOpenChange }: DeleteDialogProps) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleDelete() {
     setLoading(true)
+    setError(null)
+    
     try {
-      await deleteTodoAction(todoId)
-      onOpenChange(false)
-    } catch (error) {
-      console.error("Failed to delete todo:", error)
+      const result = await deleteTodoAction(todoId)
+      if (result.success) {
+        onOpenChange(false)
+      } else {
+        setError(result.error || 'Failed to delete todo')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete todo')
     } finally {
       setLoading(false)
     }
@@ -38,6 +45,13 @@ export function DeleteDialog({ todoId, todoTitle, open, onOpenChange }: DeleteDi
         <DialogHeader>
           <DialogTitle>Delete Todo</DialogTitle>
         </DialogHeader>
+        
+        {error && (
+          <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+        
         <p className="text-sm text-muted-foreground">
           Are you sure you want to delete "{todoTitle}"? This action cannot be undone.
         </p>

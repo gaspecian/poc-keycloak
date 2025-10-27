@@ -15,10 +15,12 @@ interface TodoFormProps {
 
 export function TodoForm({ todo, onClose }: TodoFormProps) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
     const formData = new FormData(e.currentTarget)
     const data = {
@@ -28,14 +30,17 @@ export function TodoForm({ todo, onClose }: TodoFormProps) {
     }
 
     try {
-      if (todo) {
-        await updateTodoAction(todo.id, data)
+      const result = todo 
+        ? await updateTodoAction(todo.id, data)
+        : await createTodoAction(data)
+      
+      if (result.success) {
+        onClose()
       } else {
-        await createTodoAction(data)
+        setError(result.error || 'An error occurred')
       }
-      onClose()
-    } catch (error) {
-      console.error("Failed to save todo:", error)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
@@ -43,6 +48,12 @@ export function TodoForm({ todo, onClose }: TodoFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+          {error}
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
         <Input

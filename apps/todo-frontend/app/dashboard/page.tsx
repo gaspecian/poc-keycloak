@@ -12,7 +12,14 @@ export default async function DashboardPage() {
     redirect("/")
   }
 
-  const todos = await getTodos()
+  let todos = []
+  let error = null
+
+  try {
+    todos = await getTodos()
+  } catch (e) {
+    error = e instanceof Error ? e.message : 'Failed to load todos'
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -38,7 +45,17 @@ export default async function DashboardPage() {
       </nav>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <TodoList initialTodos={todos} />
+        {error ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+            <h2 className="text-lg font-semibold text-red-900">Access Denied</h2>
+            <p className="mt-2 text-red-700">{error}</p>
+            <p className="mt-4 text-sm text-red-600">
+              Please contact your administrator to request access.
+            </p>
+          </div>
+        ) : (
+          <TodoList initialTodos={todos} />
+        )}
       </main>
     </div>
   )
